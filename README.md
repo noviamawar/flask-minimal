@@ -11,7 +11,7 @@ ls
 cd flaks-minimal
 sudo nano /etc/systemd/system/flaskapp.service
 ```
-Lalu Masukan Code Didalam Flaksapp.service
+Lalu Masukan Code Didalam Flaskapp.service
 ```bash
 [Unit]
 Description=Flask Minimal App
