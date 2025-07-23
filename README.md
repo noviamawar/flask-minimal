@@ -1,63 +1,66 @@
-# flask-minimal
+# Deploy Flask agar Tetap Jalan setelah Reboot EC2 Manual
 
-A minimal Flask starter project designed to help you quickly set up a clean, simple, and efficient web application. This project is structured to keep things lightweight and focuses on productivity, with all your code contained in a single file (`app.py`), along with basic templates and static assets.
+berikut adalah langkah-langkah agar aplikasi Flask kamu tetap berjalan meskipun EC2 di-reboot atau terminal ssh ditutup:
 
+## 1. Masuk ke EC2 Ubuntu
+connect ke EC2 menggunakan SSH
 
-## Features
-- Single-file Flask application (`app.py`) to maximize productivity and simplicity.
-- Basic HTML template structure with minimal styling and JavaScript.
-- Simple and intuitive project setup with no unnecessary complexity.
-- Easily customizable for rapid development of web applications.
-
-## Preparation
+## 2. Ketik Code Berikut
 ```bash
-sudo apt update
-sudo apt install python3 python3-venv python3-pip -y
+ls
+cd flaks-minimal
+sudo nano /etc/systemd/system/flaskapp.service
+```
+Lalu Masukan Code Didalam Flaksapp.service
+```bash
+[Unit]
+Description=Flask Minimal App
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/flask-minimal
+Environment="PATH=/home/ubuntu/flask-minimal/venv/bin"
+ExecStart=/home/ubuntu/flask-minimal/venv/bin/python3 app.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+Setelah dimasukan lalu ctrl x
+y
+enter
+
+Lalu lanjutkan Dengan Code Ini
+```bash
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl enable flaskapp
+sudo systemctl start flaskapp
+sudo systemctl status flaskapp
 ```
 
-## Installation
+## 3. Akses Flask dari Browser
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/flask-minimal.git
-   cd flask-minimal
-   ```
+Salin IP Public IPv4 dari EC2 Instance kamu
+Lalu buka browser dan tempelkan IP kamu yang sudah disalin dan tambahkan :5000 di belakang IP
+Jika muncul hasilnya maka berhasil
 
-2. Create a virtual environment (recommended):
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
+## 4. Uji apakah flask tetap berjalan setelah terminal ditutup atau reboot
 
-3. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+Tutup tab terminal/ssh
+Coba akses ulang 54.208.5.218:5000 dari browser
+Kalau masih terbuka → berarti flask tetap hidup meskipun terminal ditutup
 
-4. Run the app:
-   ```bash
-   python app.py
-   ```
+MAKA ITU SUDAH BERHASIL 
 
-The Flask app will start, and you can view it by navigating to http://localhost:5000 in your browser.
-
-## Usage
-
-This starter project is ready to be used as a foundation for building web applications. The app.py file contains all the Flask routes and logic, making it simple to expand and customize. You can add more templates, routes, or static files as needed.
-
-## Customization
-You can easily modify:
-
- - The HTML structure in `templates/index.html`
- - The styling in `static/style.css`
- - The interactivity in `static/script.js`
-
-Feel free to update the app.py file to add your routes or any additional logic to fit your needs.
-
-## License
-This project is licensed under the MIT License.
-
-## Contributing
-Feel free to fork this repository and create pull requests if you have improvements or bug fixes. If you have any suggestions, open an issue, and we’ll discuss it!
-
-This project is built with simplicity and efficiency in mind, perfect for quickly starting small web apps or prototypes with minimal overhead.
+## 5. Uji otomatisasi saat EC2 di-reboot 
+```BASH
+sudo reboot
+```
+Setelah EC2 hidup kembali, connect ulang via ssh
+Jalankan:
+```BASH
+sudo systemctl status flaskapp
+```
+Akses ulang browser 54.208.5.218:5000 → kalau masih terbuka, berarti flask sukses jalan otomatis saat reboot
